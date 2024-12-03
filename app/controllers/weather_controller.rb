@@ -2,50 +2,44 @@ class WeatherController < ApplicationController
   def index
   end
 
-
-  def cache_available?
-    begin
-      test_key = "cache_test_key"
-      Rails.cache.write(test_key, "test_value", expires_in: 1.minute)
-      cached_value = Rails.cache.read(test_key)
-      Rails.cache.delete(test_key)
-      cached_value == "test_value"
-    rescue StandardError => e
-      logger.error "Cache availability check failed: #{e.message}"
-      false
-      raise e
-    end
-  end
-
-
   def fetch_weather
-
     address = params[:address]
     coordinates = Geocoder.coordinates(address)
-    logger.debug(address)
-    logger.debug(coordinates)
+
     if coordinates
       zip_code = Geocoder.search(address).first.postal_code
-      logger.debug(zip_code)
       cache_key = "weather_#{zip_code}"
-      logger.debug(cache_key)
-      if Rails.cache.exist?(cache_key)
-        logger.debug("found")
-        @weather = Rails.cache.read(cache_key)
-        @cached = true
-      else
-        logger.debug("writing cachekey")
-        logger.debug(cache_key)
+
+      @weather, @cached = fetch_cached_weather(cache_key)
+
+      unless @weather
         @weather = WeatherService.get_forecast(coordinates)
-        Rails.cache.write(cache_key, @weather)
-        if !Rails.cache.exist?(cache_key)
-          raise "Cache sanity check failed"
-        end
+        cache_weather_data(cache_key, @weather)
         @cached = false
       end
     else
       flash[:error] = 'Invalid address'
       redirect_to root_path
     end
+  end
+
+  private
+
+  # Fetch cached weather data and delete if stale
+  def fetch_cached_weather(key)
+    entry = CacheEntry.find_by(key: key)
+
+    #TODO 30 is the time to live for the cache entry.  It should be defined by env var, not hardcoded.
+    if entry && entry.created_at > 30.minutes.ago
+      [JSON.parse(entry.value, symbolize_names: true), true]
+    else
+      entry&.destroy # Delete stale entry if it exists
+      [nil, false]
+    end
+  end
+
+  # Cache weather data
+  def cache_weather_data(key, weather_data)
+    CacheEntry.create!(key: key, value: weather_data.to_json, created_at: Time.current)
   end
 end

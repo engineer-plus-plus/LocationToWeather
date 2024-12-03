@@ -11,9 +11,7 @@ module LocationToWeather
     config.cache_store = :redis_store, "redis://localhost:6379/0/cache", { expires_in: 30.minutes }    # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.1
 
-    require 'logger'
-    require 'httparty'
-    HTTParty.logger(Logger.new($stdout), :debug, :curl)
+
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.

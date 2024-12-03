@@ -73,6 +73,7 @@ gem 'sassc-rails', '>= 2.1.0'
 gem 'httparty'
 gem 'redis-rails', '~> 5.0'
 gem 'geocoder'
+gem 'net-http'
 group :development, :test do
   gem 'rspec-rails', '~> 6.0'
   gem 'timecop'
