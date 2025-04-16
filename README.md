@@ -1,11 +1,11 @@
 # README
 
-This application demonstrates the requested functionality, but there are a few improvements I would make in a production setting that are omitted here due to time constraints:
+This application demonstrates the requested functionality completely.  However in order for this to be completely production ready, there is more work to be done.  I didn't do it for a few reasns main one being I'm not getting paid for this.  This more of a proof of concept level implementation.   Here are some ways this can be made production-ready, depending on the non-fuctional requirenments that would be gathered from feedback from steakholders in real production environment.
 
 - **Use Redis for Caching**
-  Cache should be handled by Redis instead of SQLite. Redis can automatically manage the 30-minute expiration time and offers other performance and scalability benefits. I initially attempted to implement Redis but switched to SQLite (Plan B) due to integration delays.
+  Cache should be handled by Redis instead of SQLite. Redis can automatically manage the 30-minute expiration time and offers other performance and scalability benefits. I initially attempted to implement Redis but switched to SQLite (Plan B) because integrating Redis was taking too long.  I went with second-best solution to meet the "deadline".
 - **Cron Job for Expired Cache Entries**
-  With Plan B, the management of expired cache entries falls on us. A cron job should be implemented to remove stale entries. Let me emphasize that, for production, I would make the Redis solution work.
+  Since I sent with SQLite, there is a problem.  By default, it doesn't delete expired cache entries.  That would be a problem if the service is used in anything more than a POC capacity.  One way to handle this is to create a cron job that deletes all expired entries.  Though just using
 - **Environment-Specific Configuration**
   Values like the cache expiration time and the weather service API key should be stored in environment variables (e.g., `.env` file or a secrets manager). This ensures sensitive data isn’t hard-coded and makes configuration more flexible.
 - **Environment-Specific Settings**
